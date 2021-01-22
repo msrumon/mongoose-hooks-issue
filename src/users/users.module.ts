@@ -7,18 +7,14 @@ import { UsersService } from './users.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name, schema: UserSchema }]),
     MongooseModule.forFeatureAsync([
       {
         name,
         useFactory: () => {
-          UserSchema.pre('save', async function (err) {
-            if (err) {
-              throw err;
-            }
-
+          UserSchema.pre('save', async function (next) {
             if (this.isModified('password')) {
               this.password = await hash(this.password, 10);
+              next();
             }
           });
           return UserSchema;
